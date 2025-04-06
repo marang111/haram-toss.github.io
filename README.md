@@ -1,1 +1,1 @@
-# haram-toss.github.io
+# haramtoss.github.io
