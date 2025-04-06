@@ -194,9 +194,8 @@
     </div>
   
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script>
-  $(function () {
+  <script>
+    $(function () {
     const $joystick = $('.joystick');
     const $joystickScale = $('.joystick-scale');
     const $joystickContainer = $('.joystick-container');
@@ -207,7 +206,11 @@
     let zoomLevel = 0;
     let centerX, centerY, startX, startY;
     const maxDistance = 30;
+    const minMoveThreshold = 5; // 움직임 감지 최소 거리
     let currentDistance = 0;
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const sensitivity = isTouchDevice ? 0.6 : 1.0;
 
     function getClientCoords(e) {
       if (e.type.startsWith('touch')) {
@@ -221,12 +224,13 @@
 
     function updateJoystickPosition(dx, dy) {
       let distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < minMoveThreshold) return; // 너무 작은 움직임 무시
       if (distance > maxDistance) distance = maxDistance;
       currentDistance = distance;
 
       const angle = Math.atan2(dy, dx);
-      const moveX = Math.cos(angle) * distance;
-      const moveY = Math.sin(angle) * distance;
+      const moveX = Math.cos(angle) * distance * sensitivity;
+      const moveY = Math.sin(angle) * distance * sensitivity;
 
       $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
 
@@ -288,7 +292,7 @@
       updateJoystickPosition(dx, dy);
     }
 
-    function onEnd(e) {
+    function onEnd() {
       onStopDrag();
     }
 
@@ -316,7 +320,6 @@
       $(document).on('mouseup touchend', onEnd);
     });
   });
-</script>
-
+  </script>
 </body>
 </html>
