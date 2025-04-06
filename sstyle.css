@@ -6,10 +6,11 @@ body{
     font-family: Pretendard;
     word-break: keep-all;
     perspective: 1000px; /* 3D 효과를 위한 원근감 */
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
     }
-    ::-webkit-scrollbar {
-    display: none;
-}
+
 .custom-cursor {
     position: fixed;
     width: 40px;
