@@ -1,96 +1,194 @@
 $(function(){
     document.body.style.cursor = 'none';
+    let zIndexCounter = 1000; // z-index 초기값
 
-    const joystick = document.querySelector('.joystick');
-    const joystickScale = document.querySelector('.joystick-scale');
-    const joystickContainer = document.querySelector('.joystick-container');
-    const contentParagraphs = document.querySelectorAll('.content p');
+    $(".con").on("dragend", function () {
+        
 
-    let isDragging = false;
-    let isLocked = false;
-    let zoomLevel = 0;
-    let centerX, centerY, startX, startY;
-    const maxDistance = 30;
-    let currentDistance = 0;
+        let popupId = $(this).data("popup"); // 해당 요소의 data-popup 값 가져오기
+        let $popup = $("#" + popupId); // 해당하는 팝업 요소
 
-    // $(".joystick-container").draggable();
+      // 팝업 열기
+    $popup.slideDown();
+    let originalPosition = {}; // 초기 위치를 저장할 변수
+    let isNearParent = false;  // 부모 영역에 가까운지 확인하는 플래그
+    let distance = 0; // distance 변수를 외부에서 선언
 
-    joystick.addEventListener('mousedown', (event) => {
-      if (isLocked) {
-        // 잠금 상태 해제 시 본문 숨김
-        isLocked = false;
-        joystickContainer.classList.remove('locked');
-        resetJoystick();
-        return;
-      }
+    // 팝업을 드래그 가능하게 설정
+    $popup.draggable({
 
-      isDragging = true;
-      centerX = joystickContainer.offsetLeft + joystickContainer.offsetWidth / 2;
-      centerY = joystickContainer.offsetTop + joystickContainer.offsetHeight / 2;
-      startX = event.clientX;
-      startY = event.clientY;
+        start: function () {
+            // 드래그 시작 시 초기 위치 저장
+            originalPosition = {
+                top: $(this).position().top,
+                left: $(this).position().left
+            };
+        },
+        drag: function (event) {
+            $(this).css({
+                "transform":"scale(1.05)"
+            })
+            // 마우스 위치 추적
+            let mouseX = event.clientX;
 
-      document.addEventListener('mousemove', onDrag);
-      document.addEventListener('mouseup', onStopDrag);
+            // 부모 요소의 오른쪽 끝 (부모의 왼쪽 + 부모의 너비)
+            let parentRightEdge = $(this).parent().offset().left + $(this).parent().outerWidth();
+            
+            // 마우스와 부모의 오른쪽 끝 사이의 거리 계산
+            distance = parentRightEdge - mouseX;
+
+            // 부모 영역과의 거리 조건에 따라 스타일 변경
+            if (distance >= 80) {
+                $(this).css({
+                    "background-color": "",
+                    "border": "",
+                    "opacity": ""
+                }).removeClass("popup-drag");
+
+                isNearParent = true; // 원래 팝업창 유지
+            } 
+
+            if (distance <= 80) {
+                $(this).css({
+                    "background-color": "midnightblue",
+                    "opacity": "",
+                    "transform": ""
+                }).addClass("popup-drag");
+
+                isNearParent = true; // 탐색바 띄울 준비
+            } 
+            
+            if (distance <= 50) {
+                $(this).css({ 
+                    "background-color": "black",
+                    "opacity": "10%"
+                });
+ 
+                isNearParent = false; // 사라질 준비
+            }
+        },
+        stop: function () {
+            $(this).css({
+                "transform":""
+            })
+            if (distance <= 50) {
+                ////✳️ x로 사라지게 하기
+                if(""){};
+
+                $(this).animate({ 
+                    "transform": "scale(0)",
+                    "opacity":0,
+                }, 200);
+
+            } else if (distance <= 80) {
+                ////✳️ 탐색창 띄우기
+
+                if ($(".popup-navi").length){
+                    //탐색창 한번 띄우고 또 띄우면 실행(네비 창 블록으로 쌓이게하기)
+
+                    // alert("ddddd")
+                    let lastNavi = $(".popup-navi").last(); // 가장 최근 탐색창 가져오기
+                    let newTop = lastNavi.offset().top + lastNavi.outerHeight() - 39;
+
+                    $(this).animate({
+                        top: newTop, // 탐색창 아래로 배치
+                        left: originalPosition.left
+                    }).css({
+                        "background-color":"navy"
+                    }).removeClass("popup-drag").addClass("popup-navi");
+
+                } else{
+                    $(this).animate({
+                        top: originalPosition.top, // 탐색창 위치 고정
+                        left: originalPosition.left
+                    }).css({
+                        "background-color": "navy"
+                    }).removeClass("popup-drag").addClass("popup-navi");
+
+                    $(".subtt").addClass("subtitle");
+                    $(".popup-img").hide();
+                }
+                
+                // 상단에 탐색창 열기************************
+
+                // $(this).animate({
+                //     top: originalPosition.top,
+                //     left: originalPosition.left
+                // }).css({
+                //     "background-color": "midnightblue"
+
+                // }).removeClass("popup-drag").addClass("popup-navi");
+                // $(".subtt").addClass("subtitle");
+                // $(".popup-img").hide();
+
+            } else {
+
+                // 원래대로
+
+                $(this).animate({
+                    top: originalPosition.top,
+                    left: originalPosition.left
+                }).css({
+                    "background-color": ""
+                }).removeClass("popup-drag");
+            }
+        }
+    });
+    $(".popup").on("mousedown", function () {
+        $(this).css("background-color", "yellow"); // 꾹 누르는 동안 빨간색으로 변경
     });
 
-    function onDrag(event) {
-      if (!isDragging || isLocked) return;
-
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
-      let distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance > maxDistance) distance = maxDistance;
-
-      currentDistance = distance;
-
-      const angle = Math.atan2(dy, dx);
-      const moveX = Math.cos(angle) * distance;
-      const moveY = Math.sin(angle) * distance;
-
-      joystick.style.transform = `translate(${moveX}px, ${moveY}px)`;
-
-      let newSize = 40 + (distance / maxDistance) * 60;
-      joystickScale.style.width = `${newSize}px`;
-      joystickScale.style.height = `${newSize}px`;
-
-      const newZoomLevel = Math.max(0, Math.min(100, (distance / maxDistance) * 100));
-      const numVisibleParagraphs = Math.floor((newZoomLevel / 100) * contentParagraphs.length);
-
-      contentParagraphs.forEach((p, index) => {
-        p.style.maxHeight = index < numVisibleParagraphs ? "50px" : "0";
-      });
-
-      zoomLevel = newZoomLevel;
-    }
-
-    function onStopDrag() {
-      if (!isDragging) return;
-
-      isDragging = false;
-      document.removeEventListener('mousemove', onDrag);
-      document.removeEventListener('mouseup', onStopDrag);
-
-      if (currentDistance >= maxDistance) {
-        isLocked = true;
-        joystickContainer.classList.add('locked');
-      } else {
-        resetJoystick();
-      }
-    }
-
-    function resetJoystick() {
-      joystick.style.transform = "translate(0, 0)";
-      joystickScale.style.width = "40px";
-      joystickScale.style.height = "40px";
-      zoomLevel = 0;
-
-      // 본문 내용 다시 숨김
-      contentParagraphs.forEach(p => p.style.maxHeight = "0");
-    }
 
 
-///////////마우스 커서
+
+
+   // z-index를 가장 높게 설정
+        zIndexCounter++;
+        $popup.css("z-index", zIndexCounter);
+    });
+
+    $("#mobile").on("scroll", function () {
+        $(".popup").css("top", $(this).scrollTop() + 44 + "px");
+
+        let opacity = 1 - $(this).scrollTop() / 200; // 스크롤할수록 투명해짐
+          $(".popup").css({
+            "opacity": opacity < 0.3 ? 0.3 : opacity, // 최소 투명도 0.3 유지
+          });
+
+
+        let containerHeight = $("#mobile").height(); // #mobile 높이
+        let centerY = containerHeight / 2; // #mobile 중앙 좌표
+
+        $(".con").each(function () {
+           let contentTop = $(this).offset().top - $(window).scrollTop(); // 요소의 위치
+           let distance = Math.abs(centerY - (contentTop + $(this).outerHeight() / 2)); // 중앙과의 거리
+
+           let scale = 1.06 - Math.min(distance / centerY, 0.2); // 중앙에 가까울수록 커지고, 멀어질수록 작아짐
+           scale = Math.max(scale, 1); // 최소 크기 제한
+
+           $(this).css("transform", `scale(${scale})`);
+       });
+    });
+
+   
+
+    
+
+    
+
+    // // 팝업 마우스 위치에 다르게 생기게 하기 
+    // $(".con").on("dragend", function (e) {
+    //   let popupId = $(this).data("popup"); // data-popup 값 가져오기
+    //   let $popup = $("#" + popupId); // 해당 popup 요소 선택
+
+    //   $popup.css({
+    //     position: "fixed", // 화면에 고정
+    //     top: e.clientY + "px", // 마우스 위치 기준
+    //     left: e.clientX + "px",
+    //     display: "none" // 처음에는 숨김
+    //   }).slideDown(); // 부드럽게 나타남
+    // });
+
 
     $(".con").on("dragstart", function () {
        $(this).css("background-color", "white");
