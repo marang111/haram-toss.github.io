@@ -1,273 +1,322 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스케치 1</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스틱 5 -(2)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      background: white;
+      position: relative;
+    }
 
-    <script src="sscript.js"></script>
-    <link rel="stylesheet" type="text/css" href="sstyle.css">
+    .container {
+      position: relative;
+      width: 400px;
+      border: 2px solid black;
+      padding: 20px;
+      background: white;
+      text-align: center;
+      transition: height 0.3s ease-in-out;
+      overflow-x: hidden;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: left;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .content {
+      width: 100%;
+      background-color: ;
+    }
+
+    .content p {
+      position: relative;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out;
+      text-align: left;
+    }
+
+    .joystick-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 100px;
+      background: rgba(200, 200, 200, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      border: 5px solid transparent;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .joystick-container.locked {
+      animation: glowPulse 0.4s cubic-bezier(0.6, 0, 0.8, 1) forwards;
+    }
+
+    @keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 140, 0.5); /* 밝은 핑크빛 빨강 */
+  }
+  10% {
+    box-shadow: 0 0 20px 10px rgba(255, 80, 80, 0.7); /* 생기있는 밝은 빨강 */
+  }
+  30% {
+    box-shadow: 0 0 14px 8px rgba(255, 30, 30, 0.9); /* 진한 정열 레드 */
+  }
+  100% {
+    box-shadow: 0 0 8px 4px rgba(255, 60, 60, 1); /* 쨍한 빨강으로 마무리 */
+  }
+}
+
+    @keyframes holdingGlow {
+      0% {
+        box-shadow: 0 0 6px 3px deepskyblue;
+      }
+      50% {
+        box-shadow: 0 0 12px 6px skyblue;
+      }
+      100% {
+        box-shadow: 0 0 6px 3px deepskyblue;
+      }
+    }
+
+    .joystick-container.holding {
+      animation: holdingGlow 1s infinite;
+    }
+
+
+    .joystick {
+      width: 40px;
+      height: 40px;
+      background: gray;
+      border-radius: 50%;
+      position: absolute;
+      will-change: transform;
+      transition: none;
+    }
+
+    .joystick-scale {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(100, 100, 100, 0.3);
+      border-radius: 50%;
+      will-change: width, height;
+      transition: none;
+    }
+    .img{
+      position: relative;
+      background-image: url(img.png);
+      width: 100%;
+      height: 300px;
+      background-size: cover;
+      background-color: red;
+    }
+  </style>
 </head>
 <body>
-<div id="memo">
-    *-어떻게 해야 콘텐츠를 아무곳으로 끌어서 창으로 만들고 싶은 디자인이 될지 *- 어떻게 팝업창이 거슬리지 않을수 있는지
-
-</div>
-<div id="mobile">
-    <div class="custom-cursor"></div>
-    <div id="env-top"></div>
-    <div id="popup1" class="popup">
-        <div class="content">
-            <div class="subtt">디지털 디톡스, 현대인의 필수 습관으로 자리 잡다 새로미디어 25.03.10</div>
-            <div class="popup-img"></div>
-
-            <div class="subt">
-                디지털 피로, 현대 사회의 새로운 문제
-            </div>
-            <div class="text">
-                스마트폰과 SNS의 사용 시간이 점점 늘어나면서 디지털 피로(digital fatigue)가 현대인의 주요 스트레스 원인으로 떠오르고 있다. 많은 사람들이 아침에 눈을 뜨자마자 스마트폰을 확인하고, 하루 평균 5시간 이상을 온라인에서 보내며, 수십 번씩 SNS 알림을 확인하는 습관을 가지고 있다. 연구에 따르면, 이러한 과도한 디지털 노출은 집중력 저하, 불안 증가, 수면 장애 등 다양한 부작용을 초래할 수 있다.
-            </div>
-            <div class="subt">
-                디지털 디톡스, 새로운 라이프스타일 트렌드
-            </div>
-            <div class="text">
-                이에 따라 ‘디지털 디톡스(digital detox)’를 실천하는 사람들이 증가하고 있다. 디지털 디톡스란 일정 시간 동안 스마트폰, SNS, 이메일 등의 디지털 기기 사용을 줄이고 아날로그적인 활동을 통해 심신의 균형을 되찾는 것을 의미한다. 특히 주말 동안 휴대폰을 멀리하는 ‘테크 프리 데이(Tech-Free Day)’를 실천하거나, 여행 중에 SNS를 사용하지 않는 ‘디지털 프리 여행’을 선택하는 사람들이 늘어나고 있다.
-            </div>
-            <div class="subt">
-                기업과 브랜드도 디지털 디톡스 트렌드에 동참
-            </div>
-            <div class="text">
-                일부 기업들은 직원들의 생산성과 정신 건강을 위해 ‘디지털 디톡스 데이’를 운영하고 있다. 예를 들어, 한 글로벌 IT 기업은 매월 한 번 직원들에게 이메일과 채팅 사용을 제한하고, 대신 오프라인 회의를 장려하는 프로그램을 도입했다. 또한 호텔 업계에서는 스마트폰 사용을 최소화할 수 있도록 ‘디지털 디톡스 리트릿’을 제공하며, 아날로그적인 경험을 강화한 여행 상품을 선보이고 있다.
-            </div>
-        </div>
+  <!-- 조이스틱 홀딩 애니메이션 추가, 잠금 애니메이션 색 수정 -->
+    <div class="container">
+      <div class="title">
+        김정은도 신기한 듯 만져봤다 …北 특수부대, 드론 피하는 방법?
+      </div>
+      <div class="content">
+        <p class="img"></p>
+        <p>
+          김정은 북한 국무위원장이 윤석열 전 대통령의 탄핵이 인용된 4일 특수작전부대 훈련을 시찰하고 싸움 준비를 강조했다.
+        </p>
+        <p>
+          일각에서는 현대전에서 중요한 드론 공격을 피하는 방법을 탐구 중이라는 관측도 나온다.
+        </p>
+        <p>
+          조선중앙통신은 김정은이 이날 인민군 특수작전부대들의 훈련기지를 방문해 종합훈련을 지도하면서
+        </p>
+        <p>
+          “싸움 준비 완성이 국가와 인민에 대한 제일가는 애국심이고 충성심”이라며 투철한 사상 무장을 강조했다고 5일 전했다.
+        </p>
+        <p>
+          북한이 공개한 사진을 보면, 머리부터 발끝까지 수풀로 위장한 특수부대원들이 훈련을 하고 있다.
+        </p>
+        <p>
+          소총까지 수풀로 위장해 은폐를 시도했고, 이런 특수부대원들을 김정은이 가까이 다가가 만져보는 모습도 공개됐다.
+        </p>
+        <p>수풀 위장을 통해 드론에 발각되는 것을 피하려는 의도로 풀이된다.</p>
+        <p>
+          통신은 이번 훈련이 “현대전의 발전 양상과 변화 추이에 맞게 특수작전 무력 강화를 위한 
+        </p>
+        <p>
+          우리 식의 새로운 전법과 방법론을 부단히 탐구적용하고,
+        </p>
+        <p>
+          실용적인 실전 훈련 과정을 통해 숙달시키기 위해 진행됐다”고 소개했다. 
+        </p>
+        <p>
+          이어 김정은이 특수작전 능력을 고도화하기 위한 중요 과업을 밝혔다고 했으나 구체적인 과업의 내용에 대해서는 언급하지 않았다.
+        </p>
+        <p>
+          북한이 말하는 현대전은 러시아-우크라이나 전쟁에서 행해지는 드론전을 의미한다는 것이 전문가들의 분석이다.
+        </p>
+        
+        <p>영국 국방부는 3월 기준 북한군이 러시아 쿠르스크에서의 공격 작전으로 5000명 이상의 사상자를 냈으며, </p>
+      </div>
+      <div class="title">
+        토요일 3시? 애매한 결혼식 시간에 대처하는 우리의 자세
+      </div>
+      <div class="title">
+        “승진 피하고 ‘만년 사원’ 하고 싶어요”...늘어나는 ‘오피스 피터팬’
+      </div>
+      <div class="title">
+        "우리는 AI를 가장 잘 만들지도, 가장 잘 사용하지도 못해"
+      </div>
     </div>
-    <div id="popup2" class="popup">
-        asdfsdfsdㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ
-    </div>
-    <div id="popup3" class="popup">d</div>
-    <div id="popup4" class="popup">b </div>
-
     
 
-    <div id="top">
-        <div class="main">
-            <div class="h1">이번주 인기 뉴스</div>
-        </div>
+    <div class="joystick-container">
+      <div class="joystick-scale"></div>
+      <div class="joystick"></div>
     </div>
-    <div id="middle">
-            <div class="container">
-                <div class="con1 con" draggable="true" data-popup="popup1">
-                    <div class="thumb_box">
-                        
-                        <div class="grid">
-                            <div class="category">테크</div>
-                            <div class="title">
-                                <a href="thumb1.html">
-                                디지털 디톡스, 현대인의 필수 습관으로 자리 잡다
-                                </a>
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    <div class="comp">새로미디어</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"><a href="thumb1.html"></a></div>
-                        
-                    </div>
-                    
-                </div>
+  
 
-
-                <div class="con2 con" draggable="true" data-popup="popup2">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">라이프스타일</div>
-                            <div class="title">
-                                미니멀리즘 주거 공간, 공간의 질을 바꾸다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    <div class="comp">한올타리뉴스</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con3 con" draggable="true" data-popup="popup3">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">테크</div>
-                            <div class="title">
-                                AI 비서가 당신의 하루를 설계한다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">새로미디어</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con4 con" draggable="true" data-popup="popup4">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">비즈니스</div>
-                            <div class="title">
-                                Z세대는 왜 명품보다 중고시장을 선택하는가?
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">넥스트코리아</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con5 con" draggable="true" data-popup="popup5">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">라이프스타일</div>
-                            <div class="title">
-                                식물 키우기가 현대인의 새로운 힐링 취미로 떠오르다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">소소매거진</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con6 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">연예</div>
-                            <div class="title">
-                                1인 미디어 부작용 다룬 '스트리밍', 지금 가장 필요한 질문 던진다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">데일리안</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con7 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">연예</div>
-                            <div class="title">
-                                제니 '라이크 제니', 미국 빌보드 '핫100' 83위 진입…로제 최고 기록은 3위
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">텐아시아</div>
-                                    <div class="date">25.03.19</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con8 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">세계</div>
-                            <div class="title">
-                                우주비행사 한국계 조니 김, 첫 비행 앞둔 소감은
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조선일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con9 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">사회</div>
-                            <div class="title">
-                                '50대 이후에도 일하고 싶다면'...취업 잘되는 자격증 따로 있다
-
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조세일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con10 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">사회</div>
-                            <div class="title">
-                                "나도 저기로?" 5월 황금연휴, 인기 여행지 어딘가 보니
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조세일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-    </div>
-</div>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    
+  $(function () {
+    const $joystick = $('.joystick');
+    const $joystickScale = $('.joystick-scale');
+    const $joystickContainer = $('.joystick-container');
+    const $contentParagraphs = $('.content p');
 
+    let isDragging = false;
+    let isLocked = false;
+    let zoomLevel = 0;
+    let centerX, centerY, startX, startY;
+    const maxDistance = 30;
+    let currentDistance = 0;
+
+    function getClientCoords(e) {
+      if (e.type.startsWith('touch')) {
+        return {
+          x: e.originalEvent.touches[0].clientX,
+          y: e.originalEvent.touches[0].clientY,
+        };
+      }
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    function updateJoystickPosition(dx, dy) {
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > maxDistance) distance = maxDistance;
+      currentDistance = distance;
+
+      const angle = Math.atan2(dy, dx);
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance;
+
+      $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
+
+      const newSize = 40 + (distance / maxDistance) * 60;
+      $joystickScale.css({
+        width: `${newSize}px`,
+        height: `${newSize}px`,
+      });
+
+      const newZoomLevel = Math.max(0, Math.min(100, (distance / maxDistance) * 100));
+      const numVisible = Math.floor((newZoomLevel / 100) * $contentParagraphs.length);
+
+      $contentParagraphs.each(function (index) {
+        $(this).css('max-height', index < numVisible ? '50px' : '0');
+      });
+
+      zoomLevel = newZoomLevel;
+
+      if (distance >= maxDistance) {
+        $joystickContainer.addClass('holding');
+      } else {
+        $joystickContainer.removeClass('holding');
+      }
+    }
+
+    function resetJoystick() {
+      $joystick.css('transform', 'translate(0, 0)');
+      $joystickScale.css({ width: '40px', height: '40px' });
+      zoomLevel = 0;
+      currentDistance = 0;
+      isDragging = false;
+
+      $joystickContainer.removeClass('holding locked');
+      $contentParagraphs.css('max-height', '0');
+    }
+
+    function onStopDrag() {
+      isDragging = false;
+      $(document).off('mousemove touchmove', onDrag);
+      $(document).off('mouseup touchend', onEnd);
+
+      $joystickContainer.removeClass('holding');
+
+      if (currentDistance >= maxDistance) {
+        isLocked = true;
+        $joystickContainer.addClass('locked');
+      } else {
+        resetJoystick();
+      }
+    }
+
+    function onDrag(e) {
+      if (!isDragging || isLocked) return;
+
+      const { x, y } = getClientCoords(e);
+      const dx = x - startX;
+      const dy = y - startY;
+
+      updateJoystickPosition(dx, dy);
+    }
+
+    function onEnd(e) {
+      onStopDrag();
+    }
+
+    $joystick.on('mousedown touchstart', function (e) {
+      e.preventDefault();
+
+      if (isLocked) {
+        isLocked = false;
+        $joystickContainer.removeClass('locked');
+        resetJoystick();
+        return;
+      }
+
+      isDragging = true;
+
+      const containerOffset = $joystickContainer.offset();
+      centerX = containerOffset.left + $joystickContainer.outerWidth() / 2;
+      centerY = containerOffset.top + $joystickContainer.outerHeight() / 2;
+
+      const { x, y } = getClientCoords(e);
+      startX = x;
+      startY = y;
+
+      $(document).on('mousemove touchmove', onDrag);
+      $(document).on('mouseup touchend', onEnd);
+    });
+  });
 </script>
+
 </body>
 </html>
