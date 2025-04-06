@@ -1,0 +1,235 @@
+body{
+    margin: 0;
+    padding: 0;
+    background-color: black;
+     -ms-overflow-style: none;
+    font-family: Pretendard;
+    word-break: keep-all;
+    perspective: 1000px; /* 3D 효과를 위한 원근감 */
+    }
+    ::-webkit-scrollbar {
+    display: none;
+}
+.custom-cursor {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background-color:rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s linear;
+    z-index: 9999;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+.popup {
+    display: none;
+    position: absolute;
+    top: 44px;
+    right: 0;
+    width: 250px;
+    height: 350px;
+    padding: 16px;
+    background-color: white;
+    z-index: 1;
+    overflow: auto;
+
+
+    user-select: none; /* 텍스트 선택(드래그) 방지 */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      
+    }
+.popup-img{
+    position: relative;
+    background-image: url(img1.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width:100%;
+    height: 200px;
+
+    }
+
+.popup-drag{
+    width: 50px;
+    height: 50px;
+}
+
+.popup-navi{
+    display: none;
+    width: 250px;
+    height: 22px;
+    color: lightgray;
+    font-size: 17px;
+    overflow: hidden; /* 넘치는 텍스트는 숨김 */
+    
+}
+.subtt{
+    font-weight: bolder;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+.subtitle{
+    width: 250px;
+    display: block;
+    white-space: nowrap;       /* 줄바꿈 방지 */
+    overflow: hidden;           /* 넘친 텍스트 숨김 */
+    text-overflow: ellipsis;    /* 말줄임표 추가 */
+    display: block;             /* 블록 요소로 설정 */
+}
+#mobile{
+    position: relative;
+    width: 414px;
+    height: 896px;
+    top: 20px;
+    margin: 0 auto;
+    background-color: white;
+    overflow: auto;
+    overflow-x: hidden;
+}
+#env-top{
+    margin-top: env(safe-area-inset-top);
+    margin-top: constant(safe-area-inset-top);
+    width: 100%;
+/*  margin-top: 44px;*/
+    height: 44px;
+    background-color: ;
+}
+#top{
+    background-color: ;
+    padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-bottom: 16px;
+
+    display: flex;
+    align-items: center;
+}
+
+.h1{
+    width: 55%;
+    color: darkblue;
+    font-size: 23px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    margin: auto;
+    margin-bottom: 8px;
+}
+.mainimg{
+    display: inline-block;
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-image: url(img1.png);
+}
+#middle{
+    position: relative;
+    max-width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+#env-bottom{
+    width: 100%;
+    height: 34px;
+    background-color:;
+    margin-bottom: env(safe-area-inset-bottom);
+    margin-bottom: constant(safe-area-inset-bottom);
+}
+/*콘텐츠영역///////////////////////////////////////////////
+*/
+.con{
+    background-color: ;
+/*  margin-bottom: 24px;*/
+
+    margin-bottom: 28px;
+    margin-top: 28px;
+
+    
+
+    transform: translateZ(0);
+    transition: transform 0.4s ease-out;
+    will-change: transform;
+}
+
+.thumb_box{
+    position: relative;
+    display: flex;
+}
+a{
+/*    display: flex;*/
+    color: inherit;
+    text-decoration: none;
+}
+.grid{
+    flex: 1;
+    padding-right: 16px;
+}
+.category{
+    font-size: 16px;
+    font-weight: 300;
+    color: darkblue;
+    margin-bottom: 8px;
+    text-decoration: underline;
+    text-decoration-thickness: 0.75px;
+
+}
+.title{
+    color: ;
+    background-color: ;
+    font-size: 18px;
+    font-weight: 500;
+    word-spacing: -0.8px;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+
+    display: -webkit-box; /* flexbox처럼 보이게 하려면 -webkit-box 사용 */
+    -webkit-box-orient: vertical; /* 텍스트가 세로로 쌓이도록 설정 */
+    -webkit-line-clamp: 2; /* 텍스트가 2줄을 넘으면 말줄임표 표시 */
+    overflow: hidden; /* 넘치는 텍스트는 숨김 */
+    text-overflow: ellipsis; /* 말줄임표 표시 */
+}
+.info{
+
+}
+.infocon{
+    display: flex;
+    margin-bottom: 16px;
+}
+.infocon div{
+    flex-direction: row;
+    color: lightslategrey;
+    font-size: 14px;
+    font-weight: 400;
+}
+.comp{
+    flex-grow:1;
+    text-align: left;
+    background-color: ;
+}
+.date{
+    flex-grow:1;
+    text-align: right;
+    background-color: ;
+}
+/*.infocon .comp{
+    background-color: whitesmoke;
+    padding: 6px 8px 6px 8px;
+    border-radius:4px;
+}*/
+/*.infocon .date{
+    padding: 6px 0 6px 0;
+}*/
+.subt{
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+.text{
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
