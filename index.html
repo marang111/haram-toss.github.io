@@ -197,130 +197,113 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
   $(function () {
-    const $joystick = $('.joystick');
-    const $joystickScale = $('.joystick-scale');
-    const $joystickContainer = $('.joystick-container');
-    const $contentParagraphs = $('.content p');
+  const $joystick = $('.joystick');
+  const $joystickScale = $('.joystick-scale');
+  const $joystickContainer = $('.joystick-container');
+  const $paragraphs = $('.content p');
 
-    let isDragging = false;
-    let isLocked = false;
-    let zoomLevel = 0;
-    let centerX, centerY, startX, startY;
-    const maxDistance = 30;
-    const minMoveThreshold = 5; // 움직임 감지 최소 거리
-    let currentDistance = 0;
+  let isDragging = false;
+  let isLocked = false;
+  let zoomLevel = 0;
+  let startX = 0;
+  let startY = 0;
+  const maxDistance = 30;
+  let currentDistance = 0;
 
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const sensitivity = isTouchDevice ? 0.6 : 1.0;
-
-    function getClientCoords(e) {
-      if (e.type.startsWith('touch')) {
-        return {
-          x: e.originalEvent.touches[0].clientX,
-          y: e.originalEvent.touches[0].clientY,
-        };
-      }
-      return { x: e.clientX, y: e.clientY };
+  function startDragging(x, y) {
+    if (isLocked) {
+      isLocked = false;
+      $joystickContainer.removeClass('locked');
+      resetJoystick();
+      return;
     }
 
-    function updateJoystickPosition(dx, dy) {
-      let distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < minMoveThreshold) return; // 너무 작은 움직임 무시
-      if (distance > maxDistance) distance = maxDistance;
-      currentDistance = distance;
+    isDragging = true;
+    startX = x;
+    startY = y;
+  }
 
-      const angle = Math.atan2(dy, dx);
-      const moveX = Math.cos(angle) * distance * sensitivity;
-      const moveY = Math.sin(angle) * distance * sensitivity;
+  function onDrag(x, y) {
+    if (!isDragging || isLocked) return;
 
-      $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
+    const dx = x - startX;
+    const dy = y - startY;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > maxDistance) distance = maxDistance;
 
-      const newSize = 40 + (distance / maxDistance) * 60;
-      $joystickScale.css({
-        width: `${newSize}px`,
-        height: `${newSize}px`,
-      });
+    currentDistance = distance;
 
-      const newZoomLevel = Math.max(0, Math.min(100, (distance / maxDistance) * 100));
-      const numVisible = Math.floor((newZoomLevel / 100) * $contentParagraphs.length);
+    const angle = Math.atan2(dy, dx);
+    const moveX = Math.cos(angle) * distance;
+    const moveY = Math.sin(angle) * distance;
 
-      $contentParagraphs.each(function (index) {
-        $(this).css('max-height', index < numVisible ? '50px' : '0');
-      });
+    $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
 
-      zoomLevel = newZoomLevel;
+    const newSize = 40 + (distance / maxDistance) * 60;
+    $joystickScale.css({ width: newSize, height: newSize });
 
-      if (distance >= maxDistance) {
-        $joystickContainer.addClass('holding');
-      } else {
-        $joystickContainer.removeClass('holding');
-      }
-    }
+    const newZoomLevel = Math.max(0, Math.min(100, (distance / maxDistance) * 100));
+    const numVisibleParagraphs = Math.floor((newZoomLevel / 100) * $paragraphs.length);
 
-    function resetJoystick() {
-      $joystick.css('transform', 'translate(0, 0)');
-      $joystickScale.css({ width: '40px', height: '40px' });
-      zoomLevel = 0;
-      currentDistance = 0;
-      isDragging = false;
+    $paragraphs.each(function (index) {
+      $(this).css('max-height', index < numVisibleParagraphs ? '50px' : '0');
+    });
 
-      $joystickContainer.removeClass('holding locked');
-      $contentParagraphs.css('max-height', '0');
-    }
+    zoomLevel = newZoomLevel;
 
-    function onStopDrag() {
-      isDragging = false;
-      $(document).off('mousemove touchmove', onDrag);
-      $(document).off('mouseup touchend', onEnd);
-
+    if (distance >= maxDistance) {
+      $joystickContainer.addClass('holding');
+    } else {
       $joystickContainer.removeClass('holding');
-
-      if (currentDistance >= maxDistance) {
-        isLocked = true;
-        $joystickContainer.addClass('locked');
-      } else {
-        resetJoystick();
-      }
     }
+  }
 
-    function onDrag(e) {
-      if (!isDragging || isLocked) return;
+  function stopDragging() {
+    if (!isDragging) return;
+    isDragging = false;
+    $(document).off('.drag');
+    $joystickContainer.removeClass('holding');
 
-      const { x, y } = getClientCoords(e);
-      const dx = x - startX;
-      const dy = y - startY;
-
-      updateJoystickPosition(dx, dy);
+    if (currentDistance >= maxDistance) {
+      isLocked = true;
+      $joystickContainer.addClass('locked');
+    } else {
+      resetJoystick();
     }
+  }
 
-    function onEnd() {
-      onStopDrag();
-    }
+  function resetJoystick() {
+    $joystick.css('transform', 'translate(0, 0)');
+    $joystickScale.css({ width: 40, height: 40 });
+    zoomLevel = 0;
+    currentDistance = 0;
+    $joystickContainer.removeClass('holding locked');
+    $paragraphs.css('max-height', '0');
+  }
 
-    $joystick.on('mousedown touchstart', function (e) {
-      e.preventDefault();
-
-      if (isLocked) {
-        isLocked = false;
-        $joystickContainer.removeClass('locked');
-        resetJoystick();
-        return;
-      }
-
-      isDragging = true;
-
-      const containerOffset = $joystickContainer.offset();
-      centerX = containerOffset.left + $joystickContainer.outerWidth() / 2;
-      centerY = containerOffset.top + $joystickContainer.outerHeight() / 2;
-
-      const { x, y } = getClientCoords(e);
-      startX = x;
-      startY = y;
-
-      $(document).on('mousemove touchmove', onDrag);
-      $(document).on('mouseup touchend', onEnd);
+  $joystick.on('mousedown', function (e) {
+    startDragging(e.clientX, e.clientY);
+    $(document).on('mousemove.drag', function (e) {
+      onDrag(e.clientX, e.clientY);
+    });
+    $(document).on('mouseup.drag', function () {
+      stopDragging();
     });
   });
+
+  $joystick.on('touchstart', function (e) {
+    const touch = e.originalEvent.touches[0];
+    startDragging(touch.clientX, touch.clientY);
+    $(document).on('touchmove.drag', function (e) {
+      const touch = e.originalEvent.touches[0];
+      onDrag(touch.clientX, touch.clientY);
+    });
+    $(document).on('touchend.drag touchcancel.drag', function () {
+      stopDragging();
+    });
+  });
+});
+
 </script>
 
 </body>
