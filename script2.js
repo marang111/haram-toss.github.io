@@ -13,11 +13,23 @@ $(function(){
     const maxDistance = 30;
     let currentDistance = 0;
 
-    // $(".joystick-container").draggable();
-
+    // 마우스 이벤트
     joystick.addEventListener('mousedown', (event) => {
+      startDrag(event.clientX, event.clientY);
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('mouseup', onStopDrag);
+    });
+
+    // 터치 이벤트
+    joystick.addEventListener('touchstart', (event) => {
+      const touch = event.touches[0];
+      startDrag(touch.clientX, touch.clientY);
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
+      document.addEventListener('touchend', onTouchEnd);
+    });
+
+    function startDrag(x, y) {
       if (isLocked) {
-        // 잠금 상태 해제 시 본문 숨김
         isLocked = false;
         joystickContainer.classList.remove('locked');
         resetJoystick();
@@ -27,18 +39,13 @@ $(function(){
       isDragging = true;
       centerX = joystickContainer.offsetLeft + joystickContainer.offsetWidth / 2;
       centerY = joystickContainer.offsetTop + joystickContainer.offsetHeight / 2;
-      startX = event.clientX;
-      startY = event.clientY;
+      startX = x;
+      startY = y;
+    }
 
-      document.addEventListener('mousemove', onDrag);
-      document.addEventListener('mouseup', onStopDrag);
-    });
-
-    function onDrag(event) {
-      if (!isDragging || isLocked) return;
-
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
+    function handleDrag(x, y) {
+      const dx = x - startX;
+      const dy = y - startY;
       let distance = Math.sqrt(dx * dx + dy * dy);
       if (distance > maxDistance) distance = maxDistance;
 
@@ -64,12 +71,34 @@ $(function(){
       zoomLevel = newZoomLevel;
     }
 
+    function onDrag(event) {
+      if (!isDragging || isLocked) return;
+      handleDrag(event.clientX, event.clientY);
+    }
+
+    function onTouchMove(event) {
+      if (!isDragging || isLocked) return;
+      event.preventDefault(); // 터치스크롤 방지
+      const touch = event.touches[0];
+      handleDrag(touch.clientX, touch.clientY);
+    }
+
     function onStopDrag() {
+      endDrag();
+      document.removeEventListener('mousemove', onDrag);
+      document.removeEventListener('mouseup', onStopDrag);
+    }
+
+    function onTouchEnd() {
+      endDrag();
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    }
+
+    function endDrag() {
       if (!isDragging) return;
 
       isDragging = false;
-      document.removeEventListener('mousemove', onDrag);
-      document.removeEventListener('mouseup', onStopDrag);
 
       if (currentDistance >= maxDistance) {
         isLocked = true;
@@ -85,12 +114,10 @@ $(function(){
       joystickScale.style.height = "40px";
       zoomLevel = 0;
 
-      // 본문 내용 다시 숨김
       contentParagraphs.forEach(p => p.style.maxHeight = "0");
     }
 
-
-///////////마우스 커서
+    // 커서 관련 (생략하지 않고 포함)
     $(document).on("mousemove", function (e) {
         $(".custom-cursor").css({
             top: e.clientY + "px",
@@ -106,10 +133,8 @@ $(function(){
         $(".custom-cursor").removeClass("held");
     });
 
-///////////모바일 마우스 커서
     const cursor = document.querySelector(".custom-cursor");
 
-    // 마우스
     document.addEventListener("mousedown", () => {
         cursor.classList.add("held");
     });
@@ -117,12 +142,10 @@ $(function(){
         cursor.classList.remove("held");
     });
 
-    // 모바일 터치 대응
     document.addEventListener("touchstart", () => {
         cursor.classList.add("held");
     });
     document.addEventListener("touchend", () => {
         cursor.classList.remove("held");
     });
-
 });
