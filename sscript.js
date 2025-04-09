@@ -1,172 +1,128 @@
-$(function () {
+$(function(){
     document.body.style.cursor = 'none';
-    let zIndexCounter = 1000;
 
-    $(".con").on("dragstart", function () {
-        $(this).css("background-color", "white");
+    const joystick = document.querySelector('.joystick');
+    const joystickScale = document.querySelector('.joystick-scale');
+    const joystickContainer = document.querySelector('.joystick-container');
+    const contentParagraphs = document.querySelectorAll('.content p');
+
+    let isDragging = false;
+    let isLocked = false;
+    let zoomLevel = 0;
+    let centerX, centerY, startX, startY;
+    const maxDistance = 30;
+    let currentDistance = 0;
+
+    // $(".joystick-container").draggable();
+
+    joystick.addEventListener('mousedown', (event) => {
+      if (isLocked) {
+        // 잠금 상태 해제 시 본문 숨김
+        isLocked = false;
+        joystickContainer.classList.remove('locked');
+        resetJoystick();
+        return;
+      }
+
+      isDragging = true;
+      centerX = joystickContainer.offsetLeft + joystickContainer.offsetWidth / 2;
+      centerY = joystickContainer.offsetTop + joystickContainer.offsetHeight / 2;
+      startX = event.clientX;
+      startY = event.clientY;
+
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('mouseup', onStopDrag);
     });
 
-    $(".con").on("touchstart", function () {
-        $(this).css("background-color", "white");
-    });
+    function onDrag(event) {
+      if (!isDragging || isLocked) return;
 
-    $(".con").on("dragend touchend", function (e) {
-        let popupId = $(this).data("popup");
-        let $popup = $("#" + popupId);
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > maxDistance) distance = maxDistance;
 
-        $popup.slideDown();
-        let originalPosition = {};
-        let isNearParent = false;
-        let distance = 0;
+      currentDistance = distance;
 
-        let startX = 0, startY = 0, origX = 0, origY = 0, dragging = false;
+      const angle = Math.atan2(dy, dx);
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance;
 
-        $popup.on("mousedown touchstart", function (event) {
-            event.preventDefault();
-            dragging = true;
+      joystick.style.transform = `translate(${moveX}px, ${moveY}px)`;
 
-            let pageX = event.pageX || event.originalEvent.touches[0].pageX;
-            let pageY = event.pageY || event.originalEvent.touches[0].pageY;
+      let newSize = 40 + (distance / maxDistance) * 60;
+      joystickScale.style.width = `${newSize}px`;
+      joystickScale.style.height = `${newSize}px`;
 
-            startX = pageX;
-            startY = pageY;
+      const newZoomLevel = Math.max(0, Math.min(100, (distance / maxDistance) * 100));
+      const numVisibleParagraphs = Math.floor((newZoomLevel / 100) * contentParagraphs.length);
 
-            let pos = $(this).position();
-            origX = pos.left;
-            origY = pos.top;
+      contentParagraphs.forEach((p, index) => {
+        p.style.maxHeight = index < numVisibleParagraphs ? "50px" : "0";
+      });
 
-            originalPosition = {
-                top: pos.top,
-                left: pos.left
-            };
-        });
+      zoomLevel = newZoomLevel;
+    }
 
-        $(document).on("mousemove touchmove", function (event) {
-            if (!dragging) return;
+    function onStopDrag() {
+      if (!isDragging) return;
 
-            let pageX = event.pageX || event.originalEvent.touches[0].pageX;
-            let pageY = event.pageY || event.originalEvent.touches[0].pageY;
+      isDragging = false;
+      document.removeEventListener('mousemove', onDrag);
+      document.removeEventListener('mouseup', onStopDrag);
 
-            let dx = pageX - startX;
-            let dy = pageY - startY;
+      if (currentDistance >= maxDistance) {
+        isLocked = true;
+        joystickContainer.classList.add('locked');
+      } else {
+        resetJoystick();
+      }
+    }
 
-            $popup.css({
-                top: origY + dy,
-                left: origX + dx,
-                transform: "scale(1.05)"
-            });
+    function resetJoystick() {
+      joystick.style.transform = "translate(0, 0)";
+      joystickScale.style.width = "40px";
+      joystickScale.style.height = "40px";
+      zoomLevel = 0;
 
-            let parentRightEdge = $popup.parent().offset().left + $popup.parent().outerWidth();
-            distance = parentRightEdge - pageX;
+      // 본문 내용 다시 숨김
+      contentParagraphs.forEach(p => p.style.maxHeight = "0");
+    }
 
-            if (distance >= 80) {
-                $popup.css({
-                    "background-color": "",
-                    "border": "",
-                    "opacity": ""
-                }).removeClass("popup-drag");
-                isNearParent = true;
-            }
 
-            if (distance <= 80) {
-                $popup.css({
-                    "background-color": "midnightblue",
-                    "opacity": "",
-                    "transform": ""
-                }).addClass("popup-drag");
-                isNearParent = true;
-            }
-
-            if (distance <= 50) {
-                $popup.css({
-                    "background-color": "black",
-                    "opacity": "10%"
-                });
-                isNearParent = false;
-            }
-        });
-
-        $(document).on("mouseup touchend", function () {
-            if (!dragging) return;
-            dragging = false;
-
-            $popup.css({ transform: "" });
-
-            if (distance <= 50) {
-                $popup.animate({
-                    opacity: 0
-                }, 200, function () {
-                    $(this).hide();
-                });
-
-            } else if (distance <= 80) {
-                if ($(".popup-navi").length) {
-                    let lastNavi = $(".popup-navi").last();
-                    let newTop = lastNavi.offset().top + lastNavi.outerHeight() - 39;
-
-                    $popup.animate({
-                        top: newTop,
-                        left: originalPosition.left
-                    }).css({
-                        "background-color": "navy"
-                    }).removeClass("popup-drag").addClass("popup-navi");
-                } else {
-                    $popup.animate({
-                        top: originalPosition.top,
-                        left: originalPosition.left
-                    }).css({
-                        "background-color": "navy"
-                    }).removeClass("popup-drag").addClass("popup-navi");
-
-                    $(".subtt").addClass("subtitle");
-                    $(".popup-img").hide();
-                }
-            } else {
-                $popup.animate({
-                    top: originalPosition.top,
-                    left: originalPosition.left
-                }).css({
-                    "background-color": ""
-                }).removeClass("popup-drag");
-            }
-        });
-
-        $(".popup").on("mousedown touchstart", function () {
-            $(this).css("background-color", "yellow");
-        });
-
-        zIndexCounter++;
-        $popup.css("z-index", zIndexCounter);
-    });
-
-    $("#mobile").on("scroll", function () {
-        $(".popup").css("top", $(this).scrollTop() + 44 + "px");
-
-        let opacity = 1 - $(this).scrollTop() / 200;
-        $(".popup").css({
-            "opacity": opacity < 0.3 ? 0.3 : opacity
-        });
-
-        let containerHeight = $("#mobile").height();
-        let centerY = containerHeight / 2;
-
-        $(".con").each(function () {
-            let contentTop = $(this).offset().top - $(window).scrollTop();
-            let distance = Math.abs(centerY - (contentTop + $(this).outerHeight() / 2));
-            let scale = 1.06 - Math.min(distance / centerY, 0.2);
-            scale = Math.max(scale, 1);
-
-            $(this).css("transform", `scale(${scale})`);
-        });
-    });
-
-    $(document).on("mousemove touchmove", function (e) {
-        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
+///////////마우스 커서
+    $(document).on("mousemove", function (e) {
         $(".custom-cursor").css({
-            top: clientY + "px",
-            left: clientX + "px",
+            top: e.clientY + "px",
+            left: e.clientX + "px",
         });
     });
+
+    $(document).on("mousedown", function () {
+        $(".custom-cursor").addClass("held");
+    });
+
+    $(document).on("mouseup", function () {
+        $(".custom-cursor").removeClass("held");
+    });
+
+///////////모바일 마우스 커서
+    const cursor = document.querySelector(".custom-cursor");
+
+    // 마우스
+    document.addEventListener("mousedown", () => {
+        cursor.classList.add("held");
+    });
+    document.addEventListener("mouseup", () => {
+        cursor.classList.remove("held");
+    });
+
+    // 모바일 터치 대응
+    document.addEventListener("touchstart", () => {
+        cursor.classList.add("held");
+    });
+    document.addEventListener("touchend", () => {
+        cursor.classList.remove("held");
+    });
+
 });
