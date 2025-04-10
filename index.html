@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>정육면체 줌</title>
   <style>
     body {
@@ -16,49 +17,48 @@
     }
 
     .scene {
-  width: 414px;
-  height: 896px;
-  position: relative;
-  transform-style: preserve-3d;
-}
+      width: 414px;
+      height: 896px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: scale(calc(100vw / 414)); /* 모바일 대응 */
+      transform-origin: top left;
+    }
 
-.cube {
-  width: 414px;
-  height: 896px;
-  position: relative;
-  transform-style: preserve-3d;
-  transform: translateZ(0px); /* 초기 줌 */
-  transition: transform 0.4s ease;
-}
+    .cube {
+      width: 414px;
+      height: 896px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(0px);
+      transition: transform 0.4s ease;
+    }
 
-.face {
-  position: absolute;
-  width: 414px;
-  height: 896px;
-  background: transparent;
-  border: 1px solid black;
-  box-sizing: border-box;
-  font-size: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: black;
-}
-
+    .face {
+      position: absolute;
+      width: 414px;
+      height: 896px;
+      background: transparent;
+      border: 1px solid black;
+      box-sizing: border-box;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: black;
+    }
 
     .front  { 
-      transform: rotateY(0deg)   translateZ(207px); 
+      transform: rotateY(0deg) translateZ(207px); 
       background: yellow; 
       transition: opacity 0.3s ease;
       opacity: 1;
     }
     .back   { transform: rotateY(180deg) translateZ(207px); background: white; }
-    .right  { transform: rotateY(90deg)  translateZ(207px); }
+    .right  { transform: rotateY(90deg) translateZ(207px); }
     .left   { transform: rotateY(-90deg) translateZ(207px); }
-    .top    { transform: rotateX(90deg)  translateZ(448px); }
+    .top    { transform: rotateX(90deg) translateZ(448px); }
     .bottom { transform: rotateX(-90deg) translateZ(448px); }
-
-
 
     .joystick-container {
       position: fixed;
@@ -142,20 +142,20 @@
       const $joystickScale = $('.joystick-scale');
       const $joystickContainer = $('.joystick-container');
       const $cube = $('#cube');
-      const $frontFace = $('.front'); // .front 선택
+      const $frontFace = $('.front');
 
       let isDragging = false;
       let isLocked = false;
       let startX = 0, startY = 0;
       const maxDistance = 30;
-      const opacityTriggerDistance = 2; // 여기 값을 줄이면 더 민감해짐
+      const opacityTriggerDistance = 2;
       let currentDistance = 0;
 
       function startDragging(x, y) {
         if (isLocked) {
           isLocked = false;
           $joystickContainer.removeClass('locked');
-          resetJoystick();
+          resetJoystick(true); // 잠금 해제 시 초기화
           return;
         }
 
@@ -169,9 +169,7 @@
 
         const dx = x - startX;
         const dy = y - startY;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > maxDistance) distance = maxDistance;
-
+        let distance = Math.min(Math.sqrt(dx * dx + dy * dy), maxDistance);
         currentDistance = distance;
 
         const angle = Math.atan2(dy, dx);
@@ -181,23 +179,11 @@
         $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
         $joystickScale.css({ width: 40 + distance * 2, height: 40 + distance * 2 });
 
-        // 줌 효과
         const zoom = 400 + (distance / maxDistance) * 400;
         $cube.css('transform', `translateZ(${zoom}px)`);
 
-        // 오퍼시티 변화
-        if (distance >= opacityTriggerDistance) {
-          $frontFace.css('opacity', 0.85);
-        } else {
-          $frontFace.css('opacity', 1);
-        }
-
-        // 조이스틱 상태 스타일
-        if (distance >= maxDistance) {
-          $joystickContainer.addClass('holding');
-        } else {
-          $joystickContainer.removeClass('holding');
-        }
+        $frontFace.css('opacity', distance >= opacityTriggerDistance ? 0.85 : 1);
+        $joystickContainer.toggleClass('holding', distance >= maxDistance);
       }
 
       function stopDragging() {
@@ -210,20 +196,21 @@
           isLocked = true;
           $joystickContainer.addClass('locked');
         } else {
-          resetJoystick();
+          resetJoystick(false);
         }
       }
 
-      function resetJoystick() {
+      function resetJoystick(forceResetZoom) {
         $joystick.css('transform', 'translate(0, 0)');
         $joystickScale.css({ width: 40, height: 40 });
-        $cube.css('transform', 'translateZ(0px)');
-        $frontFace.css('opacity', 1); // 오퍼시티 복원
+        if (forceResetZoom) {
+          $cube.css('transform', 'translateZ(0px)');
+          $frontFace.css('opacity', 1);
+        }
         currentDistance = 0;
         $joystickContainer.removeClass('holding locked');
       }
 
-      // Mouse Events
       $joystick.on('mousedown', function (e) {
         startDragging(e.clientX, e.clientY);
         $(document).on('mousemove.drag', function (e) {
@@ -232,7 +219,6 @@
         $(document).on('mouseup.drag', stopDragging);
       });
 
-      // Touch Events
       $joystick.on('touchstart', function (e) {
         const touch = e.originalEvent.touches[0];
         startDragging(touch.clientX, touch.clientY);
@@ -244,8 +230,5 @@
       });
     });
   </script>
-
-
-
 </body>
 </html>
