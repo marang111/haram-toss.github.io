@@ -62,7 +62,7 @@
 
     .joystick-container {
       position: fixed;
-      bottom: 20px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); /* 노치 대응 */
       left: 50%;
       transform: translateX(-50%);
       width: 100px;
@@ -75,7 +75,9 @@
       box-sizing: border-box;
       border: 5px solid transparent;
       transition: box-shadow 0.3s ease;
+      z-index: 1000;
     }
+
 
     .joystick-container.locked {
       animation: glowPulse 0.4s cubic-bezier(0.6, 0, 0.8, 1) forwards;
