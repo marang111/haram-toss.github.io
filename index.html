@@ -1,254 +1,251 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sketch 2</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
-    <script src="script2.js"></script>
-    <link rel="stylesheet" type="text/css" href="style2.css">
+  <meta charset="UTF-8" />
+  <title>정육면체 줌</title>
+  <style>
+    body {
+      margin: 0;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      perspective: 800px;
+      font-family: Pretendard;
+    }
+
+    .scene {
+  width: 414px;
+  height: 896px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.cube {
+  width: 414px;
+  height: 896px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(0px); /* 초기 줌 */
+  transition: transform 0.4s ease;
+}
+
+.face {
+  position: absolute;
+  width: 414px;
+  height: 896px;
+  background: transparent;
+  border: 1px solid black;
+  box-sizing: border-box;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+}
+
+
+    .front  { 
+      transform: rotateY(0deg)   translateZ(207px); 
+      background: yellow; 
+      transition: opacity 0.3s ease;
+      opacity: 1;
+    }
+    .back   { transform: rotateY(180deg) translateZ(207px); background: white; }
+    .right  { transform: rotateY(90deg)  translateZ(207px); }
+    .left   { transform: rotateY(-90deg) translateZ(207px); }
+    .top    { transform: rotateX(90deg)  translateZ(448px); }
+    .bottom { transform: rotateX(-90deg) translateZ(448px); }
+
+
+
+    .joystick-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 100px;
+      background: rgba(200, 200, 200, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      border: 5px solid transparent;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .joystick-container.locked {
+      animation: glowPulse 0.4s cubic-bezier(0.6, 0, 0.8, 1) forwards;
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 140, 140, 0.5); }
+      10% { box-shadow: 0 0 20px 10px rgba(255, 80, 80, 0.7); }
+      30% { box-shadow: 0 0 14px 8px rgba(255, 30, 30, 0.9); }
+      100% { box-shadow: 0 0 8px 4px rgba(255, 60, 60, 1); }
+    }
+
+    @keyframes holdingGlow {
+      0% { box-shadow: 0 0 6px 3px deepskyblue; }
+      50% { box-shadow: 0 0 12px 6px skyblue; }
+      100% { box-shadow: 0 0 6px 3px deepskyblue; }
+    }
+
+    .joystick-container.holding {
+      animation: holdingGlow 1s infinite;
+    }
+
+    .joystick {
+      width: 40px;
+      height: 40px;
+      background: gray;
+      border-radius: 50%;
+      position: absolute;
+      will-change: transform;
+    }
+
+    .joystick-scale {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(100, 100, 100, 0.3);
+      border-radius: 50%;
+      will-change: width, height;
+    }
+  </style>
 </head>
 <body>
-<div id="memo">
-    *-어떻게 해야 콘텐츠를 아무곳으로 끌어서 창으로 만들고 싶은 디자인이 될지 *- 어떻게 팝업창이 거슬리지 않을수 있는지
 
-</div>
-<div id="mobile">
-    <div class="custom-cursor"></div>
-    <div class="joystick-container">
-        <div class="joystick-scale"></div>
-        <div class="joystick"></div>
+  <div class="scene">
+    <div class="cube" id="cube">
+      <div class="face front">앞</div>
+      <div class="face back">뒤</div>
+      <div class="face right">우</div>
+      <div class="face left">좌</div>
+      <div class="face top">상</div>
+      <div class="face bottom">하</div>
     </div>
-    <div id="env-top"></div>
+  </div>
 
-    <div id="top">
-        <div class="main">
-            <div class="h1">이번주 인기 뉴스</div>
-        </div>
-    </div>
-    <div id="middle">
-            <div class="container">
-                <div class="con1 con" draggable="true" data-popup="popup1">
-                    <div class="thumb_box">
-                        
-                        <div class="grid">
-                            <div class="category">테크</div>
-                            <div class="title">
-                                <a href="thumb1.html">
-                                디지털 디톡스, 현대인의 필수 습관으로 자리 잡다
-                                </a>
-                            </div>
-                            
-                            <div class="info">
-                                <div class="infocon">
-                                    <div class="comp">새로미디어</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"><a href="thumb1.html"></a></div>
-                        
-                    </div>
-                    
-                </div>
+  <div class="joystick-container">
+    <div class="joystick-scale"></div>
+    <div class="joystick"></div>
+  </div>
 
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    $(function () {
+      const $joystick = $('.joystick');
+      const $joystickScale = $('.joystick-scale');
+      const $joystickContainer = $('.joystick-container');
+      const $cube = $('#cube');
+      const $frontFace = $('.front'); // .front 선택
 
-                <div class="con2 con" draggable="true" data-popup="popup2">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">라이프스타일</div>
-                            <div class="title">
-                                미니멀리즘 주거 공간, 공간의 질을 바꾸다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    <div class="comp">한올타리뉴스</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
+      let isDragging = false;
+      let isLocked = false;
+      let startX = 0, startY = 0;
+      const maxDistance = 30;
+      const opacityTriggerDistance = 2; // 여기 값을 줄이면 더 민감해짐
+      let currentDistance = 0;
 
+      function startDragging(x, y) {
+        if (isLocked) {
+          isLocked = false;
+          $joystickContainer.removeClass('locked');
+          resetJoystick();
+          return;
+        }
 
-                <div class="con3 con" draggable="true" data-popup="popup3">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">테크</div>
-                            <div class="title">
-                                AI 비서가 당신의 하루를 설계한다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">새로미디어</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
+        isDragging = true;
+        startX = x;
+        startY = y;
+      }
 
+      function onDrag(x, y) {
+        if (!isDragging || isLocked) return;
 
-                <div class="con4 con" draggable="true" data-popup="popup4">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">비즈니스</div>
-                            <div class="title">
-                                Z세대는 왜 명품보다 중고시장을 선택하는가?
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">넥스트코리아</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
+        const dx = x - startX;
+        const dy = y - startY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > maxDistance) distance = maxDistance;
 
+        currentDistance = distance;
 
-                <div class="con5 con" draggable="true" data-popup="popup5">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">라이프스타일</div>
-                            <div class="title">
-                                식물 키우기가 현대인의 새로운 힐링 취미로 떠오르다
-                            </div>
-                            <div class="content">
-                                <p>
-                                    스마트폰과 SNS의 사용 시간이 점점 늘어나면서 디지털 피로(digital fatigue)가 현대인의 주요 스트레스 원인으로 떠오르고 있다. 
-                                </p>
-                                <p>
-                                   이에 따라 ‘디지털 디톡스(digital detox)’를 실천하는 사람들이 증가하고 있다. 
-                                </p>
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">소소매거진</div>
-                                    <div class="date">25.03.13</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
+        const angle = Math.atan2(dy, dx);
+        const moveX = Math.cos(angle) * distance;
+        const moveY = Math.sin(angle) * distance;
+
+        $joystick.css('transform', `translate(${moveX}px, ${moveY}px)`);
+        $joystickScale.css({ width: 40 + distance * 2, height: 40 + distance * 2 });
+
+        // 줌 효과
+        const zoom = 400 + (distance / maxDistance) * 400;
+        $cube.css('transform', `translateZ(${zoom}px)`);
+
+        // 오퍼시티 변화
+        if (distance >= opacityTriggerDistance) {
+          $frontFace.css('opacity', 0.85);
+        } else {
+          $frontFace.css('opacity', 1);
+        }
+
+        // 조이스틱 상태 스타일
+        if (distance >= maxDistance) {
+          $joystickContainer.addClass('holding');
+        } else {
+          $joystickContainer.removeClass('holding');
+        }
+      }
+
+      function stopDragging() {
+        if (!isDragging) return;
+        isDragging = false;
+        $(document).off('.drag');
+        $joystickContainer.removeClass('holding');
+
+        if (currentDistance >= maxDistance) {
+          isLocked = true;
+          $joystickContainer.addClass('locked');
+        } else {
+          resetJoystick();
+        }
+      }
+
+      function resetJoystick() {
+        $joystick.css('transform', 'translate(0, 0)');
+        $joystickScale.css({ width: 40, height: 40 });
+        $cube.css('transform', 'translateZ(0px)');
+        $frontFace.css('opacity', 1); // 오퍼시티 복원
+        currentDistance = 0;
+        $joystickContainer.removeClass('holding locked');
+      }
+
+      // Mouse Events
+      $joystick.on('mousedown', function (e) {
+        startDragging(e.clientX, e.clientY);
+        $(document).on('mousemove.drag', function (e) {
+          onDrag(e.clientX, e.clientY);
+        });
+        $(document).on('mouseup.drag', stopDragging);
+      });
+
+      // Touch Events
+      $joystick.on('touchstart', function (e) {
+        const touch = e.originalEvent.touches[0];
+        startDragging(touch.clientX, touch.clientY);
+        $(document).on('touchmove.drag', function (e) {
+          const touch = e.originalEvent.touches[0];
+          onDrag(touch.clientX, touch.clientY);
+        });
+        $(document).on('touchend.drag touchcancel.drag', stopDragging);
+      });
+    });
+  </script>
 
 
-                <div class="con6 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">연예</div>
-                            <div class="title">
-                                1인 미디어 부작용 다룬 '스트리밍', 지금 가장 필요한 질문 던진다
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">데일리안</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
 
-
-                <div class="con7 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">연예</div>
-                            <div class="title">
-                                제니 '라이크 제니', 미국 빌보드 '핫100' 83위 진입…로제 최고 기록은 3위
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">텐아시아</div>
-                                    <div class="date">25.03.19</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con8 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">세계</div>
-                            <div class="title">
-                                우주비행사 한국계 조니 김, 첫 비행 앞둔 소감은
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조선일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con9 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">사회</div>
-                            <div class="title">
-                                '50대 이후에도 일하고 싶다면'...취업 잘되는 자격증 따로 있다
-
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조세일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-
-
-                <div class="con10 con">
-                    <div class="thumb_box">
-                        <div class="grid">
-                            <div class="category">사회</div>
-                            <div class="title">
-                                "나도 저기로?" 5월 황금연휴, 인기 여행지 어딘가 보니
-                            </div>
-                            <div class="info">
-                                <div class="infocon">
-                                    
-                                    <div class="comp">조세일보</div>
-                                    <div class="date">25.03.20</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="img"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-    </div>
-</div>
-<script>
-    
-
-</script>
 </body>
 </html>
